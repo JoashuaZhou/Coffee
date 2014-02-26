@@ -1,0 +1,1 @@
+.. \z_tools\imatol.com w a: helloos.img
