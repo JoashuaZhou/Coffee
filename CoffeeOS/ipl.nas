@@ -39,12 +39,22 @@ entry:
 		MOV		DH, 0			; Magnatic head 0
 		MOV		CL, 2			; Sector 2
 		
+		MOV		SI, 0			; Record the amount of failure
+
+retry:
 		MOV		AH, 0x02		; Read from disk
 		MOV		AL, 1			; read 1 sector
 		MOV		BX, 0			; ES:BX is an address of cache area
 		MOV		DL, 0x00		; Disk number 0
 		INT		0x13			; Interrupt and call for BIOS of disk
-		JC		error			; Show error message if carry flag is 1
+		JNC		finish			; If error not occur, jump to finish
+		ADD		SI, 1			; Amount of failure increase 1
+		CMP		SI, 5			; We only try to read disk less than 5 times
+		JAE		error			; We only try to read disk less than 5 times
+		MOV		AH, 0x00		; Reset BIOS of reading disk
+		MOV		DL, 0x00		; Reset BIOS of reading disk
+		INT		0x13			; Reset BIOS of reading disk
+		JMP		retry
 		
 finish:
 		HLT
