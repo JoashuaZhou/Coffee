@@ -41,7 +41,7 @@ entry:
 		
 		MOV		AH, 0x02		; Read from disk
 		MOV		AL, 1			; read 1 sector
-		MOV		BX, 0
+		MOV		BX, 0			; ES:BX is an address of cache area
 		MOV		DL, 0x00		; Disk number 0
 		INT		0x13			; Interrupt and call for BIOS of disk
 		JC		error			; Show error message if carry flag is 1

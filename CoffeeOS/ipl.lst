@@ -33,36 +33,47 @@
     31 00007C53 8E D0                           		MOV		SS, AX
     32 00007C55 BC 7C00                         		MOV 	SP, 0x7c00
     33 00007C58 8E D8                           		MOV		DS, AX
-    34 00007C5A 8E C0                           		MOV		ES,	AX
-    35 00007C5C                                 		
-    36 00007C5C BE 7C74                         		MOV		SI, msg
-    37 00007C5F                                 		
-    38 00007C5F                                 putloop:
-    39 00007C5F 8A 04                           		MOV		AL, [SI]
-    40 00007C61 83 C6 01                        		ADD		SI, 1
-    41 00007C64 3C 00                           		CMP		AL, 0
-    42 00007C66                                 		
-    43 00007C66 74 09                           		JE		finish
-    44 00007C68 B4 0E                           		MOV		AH, 0x0e		; Display a word
-    45 00007C6A BB 000F                         		MOV		BX, 15			; Designate the color for characters
-    46 00007C6D CD 10                           		INT		0x10			; Interrupt and call for BIOS of graphic card
-    47 00007C6F EB EE                           		JMP		putloop
-    48 00007C71                                 		
-    49 00007C71                                 finish:
-    50 00007C71 F4                              		HLT
-    51 00007C72 EB FD                           		JMP		finish			; Infinite loop
-    52 00007C74                                 
-    53 00007C74                                 ; Display information
-    54 00007C74                                 msg:
-    55 00007C74 0A 0A                           		DB		0x0a, 0x0a		; make 2 new lines
-    56 00007C76 68 65 6C 6C 6F 2C 20 77 6F 72   		DB		"hello, world"
-       00007C80 6C 64 
-    57 00007C82 0A                              		DB		0x0a			; make a new line
-    58 00007C83 00                              		DB		0
-    59 00007C84                                 
-    60 00007C84 00 00 00 00 00 00 00 00 00 00   		RESB	0x7dfe-$		; ?
-       00007C8E 00 00 00 00 00 00 00 00 00 00 
-       00007C98 00 00 00 00 00 00 00 00 00 00 
+    34 00007C5A                                 		
+    35 00007C5A                                 ; Read from disk
+    36 00007C5A B8 0820                         		MOV		AX, 0x0820
+    37 00007C5D 8E C0                           		MOV		ES, AX
+    38 00007C5F B5 00                           		MOV		CH, 0			; Cylinder 0
+    39 00007C61 B6 00                           		MOV		DH, 0			; Magnatic head 0
+    40 00007C63 B1 02                           		MOV		CL, 2			; Sector 2
+    41 00007C65                                 		
+    42 00007C65 B4 02                           		MOV		AH, 0x02		; Read from disk
+    43 00007C67 B0 01                           		MOV		AL, 1			; read 1 sector
+    44 00007C69 BB 0000                         		MOV		BX, 0			; ES:BX is an address of cache area
+    45 00007C6C B2 00                           		MOV		DL, 0x00		; Disk number 0
+    46 00007C6E CD 13                           		INT		0x13			; Interrupt and call for BIOS of disk
+    47 00007C70 72 03                           		JC		error			; Show error message if carry flag is 1
+    48 00007C72                                 		
+    49 00007C72                                 finish:
+    50 00007C72 F4                              		HLT
+    51 00007C73 EB FD                           		JMP		finish			; Infinite loop
+    52 00007C75                                 		
+    53 00007C75                                 error:
+    54 00007C75 BE 7C8A                         		MOV		SI, msg
+    55 00007C78                                 		
+    56 00007C78                                 putloop:
+    57 00007C78 8A 04                           		MOV		AL, [SI]
+    58 00007C7A 83 C6 01                        		ADD		SI, 1
+    59 00007C7D 3C 00                           		CMP		AL, 0
+    60 00007C7F                                 		
+    61 00007C7F 74 F1                           		JE		finish
+    62 00007C81 B4 0E                           		MOV		AH, 0x0e		; Display a word
+    63 00007C83 BB 000F                         		MOV		BX, 15			; Designate the color for characters
+    64 00007C86 CD 10                           		INT		0x10			; Interrupt and call for BIOS of graphic card
+    65 00007C88 EB EE                           		JMP		putloop
+    66 00007C8A                                 
+    67 00007C8A                                 ; Display information
+    68 00007C8A                                 msg:
+    69 00007C8A 0A 0A                           		DB		0x0a, 0x0a		; make 2 new lines
+    70 00007C8C 6C 6F 61 64 20 65 72 72 6F 72   		DB		"load error"
+    71 00007C96 0A                              		DB		0x0a			; make a new line
+    72 00007C97 00                              		DB		0
+    73 00007C98                                 
+    74 00007C98 00 00 00 00 00 00 00 00 00 00   		RESB	0x7dfe-$		; ?
        00007CA2 00 00 00 00 00 00 00 00 00 00 
        00007CAC 00 00 00 00 00 00 00 00 00 00 
        00007CB6 00 00 00 00 00 00 00 00 00 00 
@@ -98,5 +109,5 @@
        00007DE2 00 00 00 00 00 00 00 00 00 00 
        00007DEC 00 00 00 00 00 00 00 00 00 00 
        00007DF6 00 00 00 00 00 00 00 00 
-    61 00007DFE                                 
-    62 00007DFE 55 AA                           		DB		0x55, 0xaa
+    75 00007DFE                                 
+    76 00007DFE 55 AA                           		DB		0x55, 0xaa
