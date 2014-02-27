@@ -12,24 +12,26 @@ default :
 ipl.bin : ipl.nas Makefile
 	$(NASK) ipl.nas ipl.bin ipl.lst
 
-haribote.img : ipl.bin Makefile
-	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
-		wbinimg src:ipl.bin len:512 from:0 to:0   imgout:haribote.img
+coffeeOS.sys : coffeeOS.nas Makefile
+	$(NASK) coffeeOS.nas coffeeOS.sys coffeeOS.lst
 
-asm :
-	$(MAKE) ipl.bin
+coffeeOS.img : ipl.bin coffeeOS.sys Makefile
+	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
+		wbinimg src:ipl.bin len:512 from:0 to:0 \
+		copy from:coffeeOS.sys to:@: \
+		imgout:coffeeOS.img
 
 img :
-	$(MAKE) haribote.img
+	$(MAKE) coffeeOS.img
 
 run :
 	$(MAKE) img
-	$(COPY) haribote.img ..\z_tools\qemu\fdimage0.bin
+	$(COPY) coffeeOS.img ..\z_tools\qemu\fdimage0.bin
 	$(MAKE) -C ../z_tools/qemu
 
 install :
 	$(MAKE) img
-	$(IMGTOL) w a: haribote.img
+	$(IMGTOL) w a: coffeeOS.img
 
 clean :
 	-$(DEL) ipl.bin
@@ -37,4 +39,4 @@ clean :
 
 src_only :
 	$(MAKE) clean
-	-$(DEL) haribote.img
+	-$(DEL) coffeeOS.img

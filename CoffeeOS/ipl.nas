@@ -1,4 +1,4 @@
-; hello-os
+; coffeeOS
 ; TAB=4
 
 CYLS	EQU		10				; Marco definition
@@ -74,6 +74,9 @@ next:
 		ADD		CH, 1			; Move to the next cylinder
 		CMP		CH, CYLS		; Finish reading cylinder?
 		JB		readloop		; If not finish, keep reading
+		
+; Jump to the haribote.sys, which is our OS
+		JMP		0xc200
 
 finish:
 		HLT						; CPU will sleep

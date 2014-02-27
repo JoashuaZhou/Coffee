@@ -1,129 +1,140 @@
-     1 00000000                                 ; hello-os
+     1 00000000                                 ; coffeeOS
      2 00000000                                 ; TAB=4
      3 00000000                                 
-     4                                          		ORG 	0x7c00			; The address where IPL get loaded
-     5 00007C00                                 		
-     6 00007C00                                 ; The code below is a standard code used in FAT12 format floppy		
-     7 00007C00 EB 4E                           		JMP		entry
-     8 00007C02 90                              		DB		0x90
-     9 00007C03 48 45 4C 4C 4F 49 50 4C         		DB		"HELLOIPL"		; You can use any string to rename the IPL(8 bytes)
-    10 00007C0B 0200                            		DW		512				; The size of a sector(must be 512 bytes)
-    11 00007C0D 01                              		DB		1				; The size of cluster(must be a sector)
-    12 00007C0E 0001                            		DW		1				; The start position of FAT(normally start with the first sector)
-    13 00007C10 02                              		DB		2				; The amount of FAT(must be 2)
-    14 00007C11 00E0                            		DW		224				; The size of root directory(normally be 224)
-    15 00007C13 0B40                            		DW		2880			; The size of floppy(must be 2880 sectors)
-    16 00007C15 F0                              		DB		0xf0			; The type of floppy(must be 0xf0)
-    17 00007C16 0009                            		DW		9				; The length of FAT(must be 9 sectors)
-    18 00007C18 0012                            		DW		18				; The amount of sectors in a track(must be 18)
-    19 00007C1A 0002                            		DW		2				; The amount of magnetic(must be 2)
-    20 00007C1C 00000000                        		DD		0				; Be 0 if you don't partition the floppy
-    21 00007C20 00000B40                        		DD		2880			; Reclaim the size of floppy
-    22 00007C24 00 00 29                        		DB		0,0,0x29		; Unknown
-    23 00007C27 FFFFFFFF                        		DD		0xffffffff		; 
-    24 00007C2B 48 45 4C 4C 4F 2D 4F 53 20 20   		DB		"HELLO-OS   "	; The name of floppy
+     4  = 0000000A                              CYLS	EQU		10				; Marco definition
+     5 00000000                                 
+     6                                          		ORG 	0x7c00			; The address where IPL get loaded
+     7 00007C00                                 		
+     8 00007C00                                 ; The code below is a standard code used in FAT12 format floppy		
+     9 00007C00 EB 4E                           		JMP		entry
+    10 00007C02 90                              		DB		0x90
+    11 00007C03 48 45 4C 4C 4F 49 50 4C         		DB		"HELLOIPL"		; You can use any string to rename the IPL(8 bytes)
+    12 00007C0B 0200                            		DW		512				; The size of a sector(must be 512 bytes)
+    13 00007C0D 01                              		DB		1				; The size of cluster(must be a sector)
+    14 00007C0E 0001                            		DW		1				; The start position of FAT(normally start with the first sector)
+    15 00007C10 02                              		DB		2				; The amount of FAT(must be 2)
+    16 00007C11 00E0                            		DW		224				; The size of root directory(normally be 224)
+    17 00007C13 0B40                            		DW		2880			; The size of floppy(must be 2880 sectors)
+    18 00007C15 F0                              		DB		0xf0			; The type of floppy(must be 0xf0)
+    19 00007C16 0009                            		DW		9				; The length of FAT(must be 9 sectors)
+    20 00007C18 0012                            		DW		18				; The amount of sectors in a track(must be 18)
+    21 00007C1A 0002                            		DW		2				; The amount of magnetic(must be 2)
+    22 00007C1C 00000000                        		DD		0				; Be 0 if you don't partition the floppy
+    23 00007C20 00000B40                        		DD		2880			; Reclaim the size of floppy
+    24 00007C24 00 00 29                        		DB		0,0,0x29		; Unknown
+    25 00007C27 FFFFFFFF                        		DD		0xffffffff		; 
+    26 00007C2B 48 45 4C 4C 4F 2D 4F 53 20 20   		DB		"HELLO-OS   "	; The name of floppy
        00007C35 20 
-    25 00007C36 46 41 54 31 32 20 20 20         		DB		"FAT12   "		; The format name of floppy
-    26 00007C3E 00 00 00 00 00 00 00 00 00 00   		RESB	18				; Reserve 18 bytes
+    27 00007C36 46 41 54 31 32 20 20 20         		DB		"FAT12   "		; The format name of floppy
+    28 00007C3E 00 00 00 00 00 00 00 00 00 00   		RESB	18				; Reserve 18 bytes
        00007C48 00 00 00 00 00 00 00 00 
-    27 00007C50                                 
-    28 00007C50                                 ; Main body
-    29 00007C50                                 entry:
-    30 00007C50 B8 0000                         		MOV		AX, 0			; Initialize the registers
-    31 00007C53 8E D0                           		MOV		SS, AX
-    32 00007C55 BC 7C00                         		MOV 	SP, 0x7c00
-    33 00007C58 8E D8                           		MOV		DS, AX
-    34 00007C5A                                 		
-    35 00007C5A                                 ; Read from disk
-    36 00007C5A B8 0820                         		MOV		AX, 0x0820
-    37 00007C5D 8E C0                           		MOV		ES, AX
-    38 00007C5F B5 00                           		MOV		CH, 0			; Cylinder 0 (0 ~ 79)
-    39 00007C61 B6 00                           		MOV		DH, 0			; Magnatic head 0
-    40 00007C63 B1 02                           		MOV		CL, 2			; Sector 2   (1 ~ 18)
-    41 00007C65                                 		
-    42 00007C65                                 readloop:		
-    43 00007C65 BE 0000                         		MOV		SI, 0			; Record the amount of failure
-    44 00007C68                                 
-    45 00007C68                                 retry:
-    46 00007C68 B4 02                           		MOV		AH, 0x02		; Read from disk
-    47 00007C6A B0 01                           		MOV		AL, 1			; read 1 sector
-    48 00007C6C BB 0000                         		MOV		BX, 0			; ES:BX is an address of cache area
-    49 00007C6F B2 00                           		MOV		DL, 0x00		; Disk number 0
-    50 00007C71 CD 13                           		INT		0x13			; Interrupt and call for BIOS of disk
-    51 00007C73 73 10                           		JNC		next			; If error not occur, jump to next to go on reading
-    52 00007C75 83 C6 01                        		ADD		SI, 1			; Amount of failure increase 1
-    53 00007C78 83 FE 05                        		CMP		SI, 5			; We only try to read disk less than 5 times
-    54 00007C7B 73 1A                           		JAE		error			; We only try to read disk less than 5 times
-    55 00007C7D B4 00                           		MOV		AH, 0x00		; Reset BIOS of reading disk
-    56 00007C7F B2 00                           		MOV		DL, 0x00		; Reset BIOS of reading disk
-    57 00007C81 CD 13                           		INT		0x13			; Reset BIOS of reading disk
-    58 00007C83 EB E3                           		JMP		retry
-    59 00007C85                                 		
-    60 00007C85                                 next:
-    61 00007C85 8C C0                           		MOV		AX, ES			
-    62 00007C87 05 0020                         		ADD		AX, 0x0020
-    63 00007C8A 8E C0                           		MOV		ES, AX			; We have to do this since no "ADD ES, 0x0020" command
-    64 00007C8C 80 C1 01                        		ADD		CL, 1			; Move to the next sector
-    65 00007C8F 80 F9 12                        		CMP		CL, 18			; Finish reading disk?
-    66 00007C92 76 D1                           		JBE		readloop		; If not finish, keep reading
-    67 00007C94                                 
-    68 00007C94                                 finish:
-    69 00007C94 F4                              		HLT
-    70 00007C95 EB FD                           		JMP		finish			; Infinite loop
-    71 00007C97                                 		
-    72 00007C97                                 error:
-    73 00007C97 BE 7CAC                         		MOV		SI, msg
-    74 00007C9A                                 		
-    75 00007C9A                                 putloop:
-    76 00007C9A 8A 04                           		MOV		AL, [SI]
-    77 00007C9C 83 C6 01                        		ADD		SI, 1
-    78 00007C9F 3C 00                           		CMP		AL, 0
-    79 00007CA1                                 		
-    80 00007CA1 74 F1                           		JE		finish
-    81 00007CA3 B4 0E                           		MOV		AH, 0x0e		; Display a word
-    82 00007CA5 BB 000F                         		MOV		BX, 15			; Designate the color for characters
-    83 00007CA8 CD 10                           		INT		0x10			; Interrupt and call for BIOS of graphic card
-    84 00007CAA EB EE                           		JMP		putloop
-    85 00007CAC                                 
-    86 00007CAC                                 ; Display information
-    87 00007CAC                                 msg:
-    88 00007CAC 0A 0A                           		DB		0x0a, 0x0a		; make 2 new lines
-    89 00007CAE 6C 6F 61 64 20 65 72 72 6F 72   		DB		"load error"
-    90 00007CB8 0A                              		DB		0x0a			; make a new line
-    91 00007CB9 00                              		DB		0
-    92 00007CBA                                 
-    93 00007CBA 00 00 00 00 00 00 00 00 00 00   		RESB	0x7dfe-$		; ?
-       00007CC4 00 00 00 00 00 00 00 00 00 00 
-       00007CCE 00 00 00 00 00 00 00 00 00 00 
-       00007CD8 00 00 00 00 00 00 00 00 00 00 
-       00007CE2 00 00 00 00 00 00 00 00 00 00 
-       00007CEC 00 00 00 00 00 00 00 00 00 00 
-       00007CF6 00 00 00 00 00 00 00 00 00 00 
-       00007D00 00 00 00 00 00 00 00 00 00 00 
-       00007D0A 00 00 00 00 00 00 00 00 00 00 
-       00007D14 00 00 00 00 00 00 00 00 00 00 
-       00007D1E 00 00 00 00 00 00 00 00 00 00 
-       00007D28 00 00 00 00 00 00 00 00 00 00 
-       00007D32 00 00 00 00 00 00 00 00 00 00 
-       00007D3C 00 00 00 00 00 00 00 00 00 00 
-       00007D46 00 00 00 00 00 00 00 00 00 00 
-       00007D50 00 00 00 00 00 00 00 00 00 00 
-       00007D5A 00 00 00 00 00 00 00 00 00 00 
-       00007D64 00 00 00 00 00 00 00 00 00 00 
-       00007D6E 00 00 00 00 00 00 00 00 00 00 
-       00007D78 00 00 00 00 00 00 00 00 00 00 
-       00007D82 00 00 00 00 00 00 00 00 00 00 
-       00007D8C 00 00 00 00 00 00 00 00 00 00 
-       00007D96 00 00 00 00 00 00 00 00 00 00 
-       00007DA0 00 00 00 00 00 00 00 00 00 00 
-       00007DAA 00 00 00 00 00 00 00 00 00 00 
-       00007DB4 00 00 00 00 00 00 00 00 00 00 
-       00007DBE 00 00 00 00 00 00 00 00 00 00 
-       00007DC8 00 00 00 00 00 00 00 00 00 00 
-       00007DD2 00 00 00 00 00 00 00 00 00 00 
-       00007DDC 00 00 00 00 00 00 00 00 00 00 
-       00007DE6 00 00 00 00 00 00 00 00 00 00 
-       00007DF0 00 00 00 00 00 00 00 00 00 00 
-       00007DFA 00 00 00 00 
-    94 00007DFE                                 
-    95 00007DFE 55 AA                           		DB		0x55, 0xaa
+    29 00007C50                                 
+    30 00007C50                                 ; Main body
+    31 00007C50                                 entry:
+    32 00007C50 B8 0000                         		MOV		AX, 0			; Initialize the registers
+    33 00007C53 8E D0                           		MOV		SS, AX
+    34 00007C55 BC 7C00                         		MOV 	SP, 0x7c00
+    35 00007C58 8E D8                           		MOV		DS, AX
+    36 00007C5A                                 		
+    37 00007C5A                                 ; Read from disk
+    38 00007C5A B8 0820                         		MOV		AX, 0x0820
+    39 00007C5D 8E C0                           		MOV		ES, AX
+    40 00007C5F B5 00                           		MOV		CH, 0			; Cylinder 0 (0 ~ 79)
+    41 00007C61 B6 00                           		MOV		DH, 0			; Magnatic head 0 (0 ~ 1)
+    42 00007C63 B1 02                           		MOV		CL, 2			; Sector 2   (1 ~ 18)
+    43 00007C65                                 		
+    44 00007C65                                 readloop:		
+    45 00007C65 BE 0000                         		MOV		SI, 0			; Record the amount of failure
+    46 00007C68                                 
+    47 00007C68                                 retry:
+    48 00007C68 B4 02                           		MOV		AH, 0x02		; Read from disk
+    49 00007C6A B0 01                           		MOV		AL, 1			; read 1 sector
+    50 00007C6C BB 0000                         		MOV		BX, 0			; ES:BX is an address of cache area
+    51 00007C6F B2 00                           		MOV		DL, 0x00		; Disk number 0
+    52 00007C71 CD 13                           		INT		0x13			; Interrupt and call for BIOS of disk
+    53 00007C73 73 10                           		JNC		next			; If error not occur, jump to next to go on reading
+    54 00007C75 83 C6 01                        		ADD		SI, 1			; Amount of failure increase 1
+    55 00007C78 83 FE 05                        		CMP		SI, 5			; We only try to read disk less than 5 times
+    56 00007C7B 73 31                           		JAE		error			; We only try to read disk less than 5 times
+    57 00007C7D B4 00                           		MOV		AH, 0x00		; Reset BIOS of reading disk
+    58 00007C7F B2 00                           		MOV		DL, 0x00		; Reset BIOS of reading disk
+    59 00007C81 CD 13                           		INT		0x13			; Reset BIOS of reading disk
+    60 00007C83 EB E3                           		JMP		retry
+    61 00007C85                                 		
+    62 00007C85                                 next:
+    63 00007C85 8C C0                           		MOV		AX, ES			
+    64 00007C87 05 0020                         		ADD		AX, 0x0020
+    65 00007C8A 8E C0                           		MOV		ES, AX			; We have to do this since no "ADD ES, 0x0020" command
+    66 00007C8C 80 C1 01                        		ADD		CL, 1			; Move to the next sector
+    67 00007C8F 80 F9 12                        		CMP		CL, 18			; Finish reading sector?
+    68 00007C92 76 D1                           		JBE		readloop		; If not finish, keep reading
+    69 00007C94 B1 01                           		MOV		CL, 1			; Reread from sector 1
+    70 00007C96 80 C6 01                        		ADD		DH, 1			; Move to the other magnatic header
+    71 00007C99 80 FE 02                        		CMP		DH, 2			; Finish reading magnatic header?
+    72 00007C9C 72 C7                           		JB		readloop		; If not finish, keep reading
+    73 00007C9E B6 00                           		MOV		DH, 0
+    74 00007CA0 80 C5 01                        		ADD		CH, 1			; Move to the next cylinder
+    75 00007CA3 80 FD 0A                        		CMP		CH, CYLS		; Finish reading cylinder?
+    76 00007CA6 72 BD                           		JB		readloop		; If not finish, keep reading
+    77 00007CA8                                 		
+    78 00007CA8                                 ; Jump to the haribote.sys, which is our OS
+    79 00007CA8 E9 4555                         		JMP		0xc200
+    80 00007CAB                                 
+    81 00007CAB                                 finish:
+    82 00007CAB F4                              		HLT						; CPU will sleep
+    83 00007CAC EB FD                           		JMP		finish			; Infinite loop
+    84 00007CAE                                 		
+    85 00007CAE                                 error:
+    86 00007CAE BE 7CC3                         		MOV		SI, msg
+    87 00007CB1                                 		
+    88 00007CB1                                 putloop:
+    89 00007CB1 8A 04                           		MOV		AL, [SI]
+    90 00007CB3 83 C6 01                        		ADD		SI, 1
+    91 00007CB6 3C 00                           		CMP		AL, 0
+    92 00007CB8                                 		
+    93 00007CB8 74 F1                           		JE		finish
+    94 00007CBA B4 0E                           		MOV		AH, 0x0e		; Display a word
+    95 00007CBC BB 000F                         		MOV		BX, 15			; Designate the color for characters
+    96 00007CBF CD 10                           		INT		0x10			; Interrupt and call for BIOS of graphic card
+    97 00007CC1 EB EE                           		JMP		putloop
+    98 00007CC3                                 
+    99 00007CC3                                 ; Display information
+   100 00007CC3                                 msg:
+   101 00007CC3 0A 0A                           		DB		0x0a, 0x0a		; make 2 new lines
+   102 00007CC5 6C 6F 61 64 20 65 72 72 6F 72   		DB		"load error"
+   103 00007CCF 0A                              		DB		0x0a			; make a new line
+   104 00007CD0 00                              		DB		0
+   105 00007CD1                                 
+   106 00007CD1 00 00 00 00 00 00 00 00 00 00   		RESB	0x7dfe-$		; ?
+       00007CDB 00 00 00 00 00 00 00 00 00 00 
+       00007CE5 00 00 00 00 00 00 00 00 00 00 
+       00007CEF 00 00 00 00 00 00 00 00 00 00 
+       00007CF9 00 00 00 00 00 00 00 00 00 00 
+       00007D03 00 00 00 00 00 00 00 00 00 00 
+       00007D0D 00 00 00 00 00 00 00 00 00 00 
+       00007D17 00 00 00 00 00 00 00 00 00 00 
+       00007D21 00 00 00 00 00 00 00 00 00 00 
+       00007D2B 00 00 00 00 00 00 00 00 00 00 
+       00007D35 00 00 00 00 00 00 00 00 00 00 
+       00007D3F 00 00 00 00 00 00 00 00 00 00 
+       00007D49 00 00 00 00 00 00 00 00 00 00 
+       00007D53 00 00 00 00 00 00 00 00 00 00 
+       00007D5D 00 00 00 00 00 00 00 00 00 00 
+       00007D67 00 00 00 00 00 00 00 00 00 00 
+       00007D71 00 00 00 00 00 00 00 00 00 00 
+       00007D7B 00 00 00 00 00 00 00 00 00 00 
+       00007D85 00 00 00 00 00 00 00 00 00 00 
+       00007D8F 00 00 00 00 00 00 00 00 00 00 
+       00007D99 00 00 00 00 00 00 00 00 00 00 
+       00007DA3 00 00 00 00 00 00 00 00 00 00 
+       00007DAD 00 00 00 00 00 00 00 00 00 00 
+       00007DB7 00 00 00 00 00 00 00 00 00 00 
+       00007DC1 00 00 00 00 00 00 00 00 00 00 
+       00007DCB 00 00 00 00 00 00 00 00 00 00 
+       00007DD5 00 00 00 00 00 00 00 00 00 00 
+       00007DDF 00 00 00 00 00 00 00 00 00 00 
+       00007DE9 00 00 00 00 00 00 00 00 00 00 
+       00007DF3 00 00 00 00 00 00 00 00 00 00 
+       00007DFD 00 
+   107 00007DFE                                 
+   108 00007DFE 55 AA                           		DB		0x55, 0xaa
