@@ -31,8 +31,26 @@ entry:
 		MOV		SS, AX
 		MOV 	SP, 0x7c00
 		MOV		DS, AX
-		MOV		ES,	AX
 		
+; Read from disk
+		MOV		AX, 0x0820
+		MOV		ES, AX
+		MOV		CH, 0			; Cylinder 0
+		MOV		DH, 0			; Magnatic head 0
+		MOV		CL, 2			; Sector 2
+		
+		MOV		AH, 0x02		; Read from disk
+		MOV		AL, 1			; read 1 sector
+		MOV		BX, 0
+		MOV		DL, 0x00		; Disk number 0
+		INT		0x13			; Interrupt and call for BIOS of disk
+		JC		error			; Show error message if carry flag is 1
+		
+finish:
+		HLT
+		JMP		finish			; Infinite loop
+		
+error:
 		MOV		SI, msg
 		
 putloop:
@@ -45,15 +63,11 @@ putloop:
 		MOV		BX, 15			; Designate the color for characters
 		INT		0x10			; Interrupt and call for BIOS of graphic card
 		JMP		putloop
-		
-finish:
-		HLT
-		JMP		finish			; Infinite loop
 
 ; Display information
 msg:
 		DB		0x0a, 0x0a		; make 2 new lines
-		DB		"hello, world"
+		DB		"load error"
 		DB		0x0a			; make a new line
 		DB		0
 
