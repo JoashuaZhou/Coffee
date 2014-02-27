@@ -1,6 +1,8 @@
 ; hello-os
 ; TAB=4
 
+CYLS	EQU		10				; Marco definition
+
 		ORG 	0x7c00			; The address where IPL get loaded
 		
 ; The code below is a standard code used in FAT12 format floppy		
@@ -36,7 +38,7 @@ entry:
 		MOV		AX, 0x0820
 		MOV		ES, AX
 		MOV		CH, 0			; Cylinder 0 (0 ~ 79)
-		MOV		DH, 0			; Magnatic head 0
+		MOV		DH, 0			; Magnatic head 0 (0 ~ 1)
 		MOV		CL, 2			; Sector 2   (1 ~ 18)
 		
 readloop:		
@@ -62,11 +64,19 @@ next:
 		ADD		AX, 0x0020
 		MOV		ES, AX			; We have to do this since no "ADD ES, 0x0020" command
 		ADD		CL, 1			; Move to the next sector
-		CMP		CL, 18			; Finish reading disk?
+		CMP		CL, 18			; Finish reading sector?
 		JBE		readloop		; If not finish, keep reading
+		MOV		CL, 1			; Reread from sector 1
+		ADD		DH, 1			; Move to the other magnatic header
+		CMP		DH, 2			; Finish reading magnatic header?
+		JB		readloop		; If not finish, keep reading
+		MOV		DH, 0
+		ADD		CH, 1			; Move to the next cylinder
+		CMP		CH, CYLS		; Finish reading cylinder?
+		JB		readloop		; If not finish, keep reading
 
 finish:
-		HLT
+		HLT						; CPU will sleep
 		JMP		finish			; Infinite loop
 		
 error:
