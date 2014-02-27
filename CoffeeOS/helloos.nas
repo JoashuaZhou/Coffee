@@ -1,8 +1,11 @@
 ; hello-os
 ; TAB=4
 
-; The code below is a standard code used in FAT12 format floppy
-		DB		0xeb, 0x4e, 0x90
+		ORG 	0x7c00			; The address where IPL get loaded
+		
+; The code below is a standard code used in FAT12 format floppy		
+		JMP		entry
+		DB		0x90
 		DB		"HELLOIPL"		; You can use any string to rename the IPL(8 bytes)
 		DW		512				; The size of a sector(must be 512 bytes)
 		DB		1				; The size of cluster(must be a sector)
@@ -23,21 +26,38 @@
 		RESB	18				; Reserve 18 bytes
 
 ; Main body
-
-		DB		0xb8, 0x00, 0x00, 0x8e, 0xd0, 0xbc, 0x00, 0x7c
-		DB		0x8e, 0xd8, 0x8e, 0xc0, 0xbe, 0x74, 0x7c, 0x8a
-		DB		0x04, 0x83, 0xc6, 0x01, 0x3c, 0x00, 0x74, 0x09
-		DB		0xb4, 0x0e, 0xbb, 0x0f, 0x00, 0xcd, 0x10, 0xeb
-		DB		0xee, 0xf4, 0xeb, 0xfd
+entry:
+		MOV		AX, 0			; Initialize the registers
+		MOV		SS, AX
+		MOV 	SP, 0x7c00
+		MOV		DS, AX
+		MOV		ES,	AX
+		
+		MOV		SI, msg
+		
+putloop:
+		MOV		AL, [SI]
+		ADD		SI, 1
+		CMP		AL, 0
+		
+		JE		finish
+		MOV		AH, 0x0e		; Display a word
+		MOV		BX, 15			; Designate the color for characters
+		INT		0x10			; Interrupt and call for BIOS of graphic card
+		JMP		putloop
+		
+finish:
+		HLT
+		JMP		finish			; Infinite loop
 
 ; Display information
-
+msg:
 		DB		0x0a, 0x0a		; make 2 new lines
 		DB		"hello, world"
 		DB		0x0a			; make a new line
 		DB		0
 
-		RESB	0x1fe-$			; Repeatly write 0x00 until the address 0x001fe
+		RESB	0x7dfe-$		; ?
 
 		DB		0x55, 0xaa
 
