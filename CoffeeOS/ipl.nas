@@ -35,10 +35,11 @@ entry:
 ; Read from disk
 		MOV		AX, 0x0820
 		MOV		ES, AX
-		MOV		CH, 0			; Cylinder 0
+		MOV		CH, 0			; Cylinder 0 (0 ~ 79)
 		MOV		DH, 0			; Magnatic head 0
-		MOV		CL, 2			; Sector 2
+		MOV		CL, 2			; Sector 2   (1 ~ 18)
 		
+readloop:		
 		MOV		SI, 0			; Record the amount of failure
 
 retry:
@@ -47,7 +48,7 @@ retry:
 		MOV		BX, 0			; ES:BX is an address of cache area
 		MOV		DL, 0x00		; Disk number 0
 		INT		0x13			; Interrupt and call for BIOS of disk
-		JNC		finish			; If error not occur, jump to finish
+		JNC		next			; If error not occur, jump to next to go on reading
 		ADD		SI, 1			; Amount of failure increase 1
 		CMP		SI, 5			; We only try to read disk less than 5 times
 		JAE		error			; We only try to read disk less than 5 times
@@ -56,6 +57,14 @@ retry:
 		INT		0x13			; Reset BIOS of reading disk
 		JMP		retry
 		
+next:
+		MOV		AX, ES			
+		ADD		AX, 0x0020
+		MOV		ES, AX			; We have to do this since no "ADD ES, 0x0020" command
+		ADD		CL, 1			; Move to the next sector
+		CMP		CL, 18			; Finish reading disk?
+		JBE		readloop		; If not finish, keep reading
+
 finish:
 		HLT
 		JMP		finish			; Infinite loop
